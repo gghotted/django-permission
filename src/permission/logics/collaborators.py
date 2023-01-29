@@ -2,10 +2,10 @@
 """
 Permission logic module for collaborators based permission system
 """
+from permission.compat import is_authenticated
 from permission.conf import settings
 from permission.logics.base import PermissionLogic
 from permission.utils.field_lookup import field_lookup
-from permission.compat import is_authenticated
 
 
 class CollaboratorsPermissionLogic(PermissionLogic):
@@ -15,6 +15,7 @@ class CollaboratorsPermissionLogic(PermissionLogic):
     def __init__(self,
                  field_name=None,
                  any_permission=None,
+                 view_permission=None,
                  change_permission=None,
                  delete_permission=None):
         """
@@ -53,6 +54,7 @@ class CollaboratorsPermissionLogic(PermissionLogic):
         """
         self.field_name = field_name
         self.any_permission = any_permission
+        self.view_permission = view_permission
         self.change_permission = change_permission
         self.delete_permission = delete_permission
 
@@ -62,6 +64,9 @@ class CollaboratorsPermissionLogic(PermissionLogic):
         if self.any_permission is None:
             self.any_permission = \
                 settings.PERMISSION_DEFAULT_CPL_ANY_PERMISSION
+        if self.view_permission is None:
+            self.view_permission = \
+                settings.PERMISSION_DEFAULT_CPL_VIEW_PERMISSION
         if self.change_permission is None:
             self.change_permission = \
                 settings.PERMISSION_DEFAULT_CPL_CHANGE_PERMISSION
@@ -107,12 +112,15 @@ class CollaboratorsPermissionLogic(PermissionLogic):
         if not is_authenticated(user_obj):
             return False
         # construct the permission full name
+        view_permission = self.get_full_permission_string('view')
         change_permission = self.get_full_permission_string('change')
         delete_permission = self.get_full_permission_string('delete')
         if obj is None:
             # object permission without obj should return True
             # Ref: https://code.djangoproject.com/wiki/RowLevelPermissions
             if self.any_permission:
+                return True
+            if self.view_permission and perm == view_permission:
                 return True
             if self.change_permission and perm == change_permission:
                 return True
@@ -127,6 +135,9 @@ class CollaboratorsPermissionLogic(PermissionLogic):
             if user_obj in collaborators:
                 if self.any_permission:
                     # have any kind of permissions to the obj
+                    return True
+                if (self.view_permission and
+                        perm == view_permission):
                     return True
                 if (self.change_permission and
                         perm == change_permission):

@@ -2,9 +2,9 @@
 """
 Permission logic module to  manage users' self-modifications
 """
+from permission.compat import is_authenticated
 from permission.conf import settings
 from permission.logics.base import PermissionLogic
-from permission.compat import is_authenticated
 
 
 class OneselfPermissionLogic(PermissionLogic):
@@ -16,6 +16,7 @@ class OneselfPermissionLogic(PermissionLogic):
     """
     def __init__(self,
                  any_permission=None,
+                 view_permission=None,
                  change_permission=None,
                  delete_permission=None):
         """
@@ -42,12 +43,16 @@ class OneselfPermissionLogic(PermissionLogic):
             settings.
         """
         self.any_permission = any_permission
+        self.view_permission = view_permission
         self.change_permission = change_permission
         self.delete_permission = delete_permission
 
         if self.any_permission is None:
             self.any_permission = \
                 settings.PERMISSION_DEFAULT_OSPL_ANY_PERMISSION
+        if self.view_permission is None:
+            self.view_permission = \
+                settings.PERMISSION_DEFAULT_OSPL_VIEW_PERMISSION
         if self.change_permission is None:
             self.change_permission = \
                 settings.PERMISSION_DEFAULT_OSPL_CHANGE_PERMISSION
@@ -90,6 +95,7 @@ class OneselfPermissionLogic(PermissionLogic):
         if not is_authenticated(user_obj):
             return False
         # construct the permission full name
+        view_permission = self.get_full_permission_string('view')
         change_permission = self.get_full_permission_string('change')
         delete_permission = self.get_full_permission_string('delete')
         # check if the user is authenticated
@@ -97,6 +103,8 @@ class OneselfPermissionLogic(PermissionLogic):
             # object permission without obj should return True
             # Ref: https://code.djangoproject.com/wiki/RowLevelPermissions
             if self.any_permission:
+                return True
+            if self.view_permission and perm == view_permission:
                 return True
             if self.change_permission and perm == change_permission:
                 return True
@@ -108,6 +116,9 @@ class OneselfPermissionLogic(PermissionLogic):
             if obj == user_obj:
                 if self.any_permission:
                     # have any kind of permissions to himself
+                    return True
+                if (self.view_permission and
+                        perm == view_permission):
                     return True
                 if (self.change_permission and
                         perm == change_permission):

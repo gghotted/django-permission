@@ -2,9 +2,9 @@
 """
 Permission logic module for group based permission system
 """
+from permission.compat import is_authenticated
 from permission.conf import settings
 from permission.logics.base import PermissionLogic
-from permission.compat import is_authenticated
 
 
 class GroupInPermissionLogic(PermissionLogic):
@@ -15,6 +15,7 @@ class GroupInPermissionLogic(PermissionLogic):
                  group_names,
                  any_permission=None,
                  add_permission=None,
+                 view_permission=None,
                  change_permission=None,
                  delete_permission=None):   # noqa
         """
@@ -55,6 +56,7 @@ class GroupInPermissionLogic(PermissionLogic):
             self.group_names = [self.group_names]
         self.any_permission = any_permission
         self.add_permission = add_permission
+        self.view_permission = view_permission
         self.change_permission = change_permission
         self.delete_permission = delete_permission
 
@@ -64,6 +66,9 @@ class GroupInPermissionLogic(PermissionLogic):
         if self.add_permission is None:
             self.add_permission = \
                 settings.PERMISSION_DEFAULT_GIPL_ADD_PERMISSION
+        if self.view_permission is None:
+            self.view_permission = \
+                settings.PERMISSION_DEFAULT_GIPL_VIEW_PERMISSION
         if self.change_permission is None:
             self.change_permission = \
                 settings.PERMISSION_DEFAULT_GIPL_CHANGE_PERMISSION
@@ -109,11 +114,14 @@ class GroupInPermissionLogic(PermissionLogic):
             return False
         # construct the permission full name
         add_permission = self.get_full_permission_string('add')
+        view_permission = self.get_full_permission_string('view')
         change_permission = self.get_full_permission_string('change')
         delete_permission = self.get_full_permission_string('delete')
         if obj is None:
             if user_obj.groups.filter(name__in=self.group_names):
                 if self.add_permission and perm == add_permission:
+                    return True
+                if self.view_permission and perm == view_permission:
                     return True
                 if self.change_permission and perm == change_permission:
                     return True
@@ -128,6 +136,9 @@ class GroupInPermissionLogic(PermissionLogic):
                     return True
                 if (self.add_permission and
                         perm == add_permission):
+                    return True
+                if (self.view_permission and
+                        perm == view_permission):
                     return True
                 if (self.change_permission and
                         perm == change_permission):

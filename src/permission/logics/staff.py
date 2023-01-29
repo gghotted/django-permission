@@ -2,9 +2,9 @@
 """
 Permission logic module for author based permission system
 """
+from permission.compat import is_authenticated
 from permission.conf import settings
 from permission.logics.base import PermissionLogic
-from permission.compat import is_authenticated
 
 
 class StaffPermissionLogic(PermissionLogic):
@@ -14,6 +14,7 @@ class StaffPermissionLogic(PermissionLogic):
     def __init__(self,
                  any_permission=None,
                  add_permission=None,
+                 view_permission=None,
                  change_permission=None,
                  delete_permission=None):
         """
@@ -50,6 +51,7 @@ class StaffPermissionLogic(PermissionLogic):
         """
         self.any_permission = any_permission
         self.add_permission = add_permission
+        self.view_permission = view_permission
         self.change_permission = change_permission
         self.delete_permission = delete_permission
 
@@ -59,6 +61,9 @@ class StaffPermissionLogic(PermissionLogic):
         if self.add_permission is None:
             self.add_permission = \
                 settings.PERMISSION_DEFAULT_SPL_ADD_PERMISSION
+        if self.view_permission is None:
+            self.view_permission = \
+                settings.PERMISSION_DEFAULT_SPL_VIEW_PERMISSION
         if self.change_permission is None:
             self.change_permission = \
                 settings.PERMISSION_DEFAULT_SPL_CHANGE_PERMISSION
@@ -102,11 +107,14 @@ class StaffPermissionLogic(PermissionLogic):
             return False
         # construct the permission full name
         add_permission = self.get_full_permission_string('add')
+        view_permission = self.get_full_permission_string('view')
         change_permission = self.get_full_permission_string('change')
         delete_permission = self.get_full_permission_string('delete')
         if obj is None:
             if user_obj.is_staff:
                 if self.add_permission and perm == add_permission:
+                    return True
+                if self.view_permission and perm == view_permission:
                     return True
                 if self.change_permission and perm == change_permission:
                     return True
@@ -121,6 +129,9 @@ class StaffPermissionLogic(PermissionLogic):
                     return True
                 if (self.add_permission and
                         perm == add_permission):
+                    return True
+                if (self.view_permission and
+                        perm == view_permission):
                     return True
                 if (self.change_permission and
                         perm == change_permission):

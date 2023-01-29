@@ -2,11 +2,11 @@
 """
 django-permission application configure
 """
+from appconf import AppConf
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from appconf import AppConf
-from permission.handlers import LogicalPermissionHandler
 
+from permission.handlers import LogicalPermissionHandler
 
 __all__ = ('settings',)
 
@@ -23,25 +23,30 @@ class PermissionConf(AppConf):
 
     DEFAULT_APL_FIELD_NAME = 'author'
     DEFAULT_APL_ANY_PERMISSION = False
+    DEFAULT_APL_VIEW_PERMISSION = True
     DEFAULT_APL_CHANGE_PERMISSION = True
     DEFAULT_APL_DELETE_PERMISSION = True
 
     DEFAULT_CPL_FIELD_NAME = 'collaborators'
     DEFAULT_CPL_ANY_PERMISSION = False
+    DEFAULT_CPL_VIEW_PERMISSION = True
     DEFAULT_CPL_CHANGE_PERMISSION = True
     DEFAULT_CPL_DELETE_PERMISSION = False
 
     DEFAULT_GIPL_ANY_PERMISSION = False
     DEFAULT_GIPL_ADD_PERMISSION = True
+    DEFAULT_GIPL_VIEW_PERMISSION = True
     DEFAULT_GIPL_CHANGE_PERMISSION = True
     DEFAULT_GIPL_DELETE_PERMISSION = False
 
     DEFAULT_OSPL_ANY_PERMISSION = False
+    DEFAULT_OSPL_VIEW_PERMISSION = True
     DEFAULT_OSPL_CHANGE_PERMISSION = True
     DEFAULT_OSPL_DELETE_PERMISSION = True
 
     DEFAULT_SPL_ANY_PERMISSION = False
     DEFAULT_SPL_ADD_PERMISSION = True
+    DEFAULT_SPL_VIEW_PERMISSION = True
     DEFAULT_SPL_CHANGE_PERMISSION = True
     DEFAULT_SPL_DELETE_PERMISSION = False
 
