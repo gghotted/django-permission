@@ -17,7 +17,8 @@ class CollaboratorsPermissionLogic(PermissionLogic):
                  any_permission=None,
                  view_permission=None,
                  change_permission=None,
-                 delete_permission=None):
+                 delete_permission=None,
+                 extra_allows=None):
         """
         Constructor
 
@@ -57,6 +58,7 @@ class CollaboratorsPermissionLogic(PermissionLogic):
         self.view_permission = view_permission
         self.change_permission = change_permission
         self.delete_permission = delete_permission
+        self.extra_allows = extra_allows or []
 
         if self.field_name is None:
             self.field_name = \
@@ -144,5 +146,7 @@ class CollaboratorsPermissionLogic(PermissionLogic):
                     return True
                 if (self.delete_permission and
                         perm == delete_permission):
+                    return True
+                if perm in self.extra_allows:
                     return True
         return False
